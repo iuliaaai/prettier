@@ -27,6 +27,8 @@ import wikiLink from "./unified-plugins/wiki-link.js";
  */
 function createParse({ isMDX }) {
   return (text) => {
+    text = restoreUnescapedUnderscore(text)
+
     const processor = unified()
       .use(remarkParse, {
         commonmark: true,
@@ -41,6 +43,17 @@ function createParse({ isMDX }) {
       .use(wikiLink);
     return processor.run(processor.parse(text));
   };
+}
+
+function restoreUnescapedUnderscore(text) {
+  const textArray = text.split(" ");
+  for (let i = 0; i < textArray.length; i++) {
+    const nrOfUnderscores = (textArray[i].match(/(?<!\\)_/g) || []).length;
+    if (nrOfUnderscores !== 0 && nrOfUnderscores !== 2) {
+      textArray[i] = textArray[i].replaceAll("_","\\_");
+    }
+  }
+  return textArray.join(" ")
 }
 
 function noop() {}
